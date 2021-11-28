@@ -1,0 +1,97 @@
+.body,
+.main {
+    display: flex;
+    align-items: center;
+    background-color: black;
+    color: chartreuse;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: large;
+    font-weight: bold;
+}
+
+.body {
+    flex-flow: column;
+}
+
+.main {
+    position: relative;
+    flex-flow: row;
+}
+
+.flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.hr {
+    width: 99vw;
+}
+
+.statistics {
+    display: flex;
+    position: absolute;
+    flex-flow: column;
+    padding: 15px;
+    right: -300px;
+    margin: 0px;
+    border-radius: 5px;
+    border: solid 3px white;
+}
+
+.grenadeprogressbar {
+    border: solid 2px white;
+    height: 9px;
+    width: 100px;
+}
+
+.grenadeprogressbarin {
+    background-color: chartreuse;
+    height: 10px;
+    width: 0px;
+}
+
+.tdaria {
+    height: 4vh;
+    width: 4vh;
+    background-color: #00ffff25;
+    border: solid 1px white;
+    border-radius: 2px;
+}
+
+.button {
+    margin: 10px;
+    background-color: yellowgreen;
+    color: black;
+    font-size: large;
+    border: solid 2px white;
+    border-radius: 10px;
+}
+
+.button:hover {
+    cursor: pointer;
+    background-color: chartreuse;
+}
+
+.zombie,
+.player,
+.grenade {
+    position: absolute;
+    height: 4vh;
+    width: 4vh;
+    margin-top: -2vh;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+
+.zombie {
+    background-image: url(./image/zombie.gif);
+}
+
+.player {
+    background-image: url(./image/player.gif);
+}
+
+.grenade {
+    background-image: url(./image/grenade.gif);
+}
