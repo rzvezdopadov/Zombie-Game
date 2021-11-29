@@ -7,7 +7,7 @@ const STATUS_GAME_VICTORY = 4;
 const STATUS_GRENADE_WAIT = 0;
 const STATUS_GRENADE_FLY = 1;
 
-const LEVEL_SPEED = 1000;
+const LEVEL_SPEED = 2000;
 
 model = {
     verticalCell: 15,
@@ -24,6 +24,13 @@ model = {
     zombieGenerateMin: 2,
     zombieGenerateMax: 5,
     zombiePosition: [],
+
+    soundAchievement: () => {},
+    soundBrains: () => {},
+    soundFire: () => {},
+    soundGameGo: () => {},
+    soundGrenade: () => {},
+    soundIntroTheme: () => {},
 }
 
 class ModelZombie {
@@ -63,8 +70,14 @@ class ModelZombie {
     startGame(model) {
         if ((model.status === STATUS_GAME_NEW) || (model.status === STATUS_GAME_DEFEAT)) {
             this.clear(model);
+
             model.status = STATUS_GAME_IN_PROCESS;
+
             this.createTimerGame(model);
+
+            this.clearAllVoices(model);
+
+            model.soundGameGo.play();;
         }
     }
 
@@ -78,6 +91,10 @@ class ModelZombie {
 
     stopGame(model) {
         this.clear(model);
+
+        this.clearAllVoices(model);
+
+        model.soundIntroTheme.play();
     }
 
     addNewZombieString(model) {
@@ -108,6 +125,8 @@ class ModelZombie {
 
             if (model.zombiePosition.length > model.verticalCell) model.zombiePosition.splice(0, 1);
 
+            if (model.point % 3) model.soundBrains.play();
+
             this.testOnTheDefeatPlayer(model);
         }
     }
@@ -122,7 +141,8 @@ class ModelZombie {
         if (pointBefore !== pointAfter) {
             model.level++;
             model.levelSpeed *= 0.9;
-            console.log(`levelSpeed: ${model.levelSpeed}`);
+
+            model.soundAchievement.play();
         }
     }
 
@@ -201,6 +221,8 @@ class ModelZombie {
             }
 
             if (!zombieHit) this.addNewZombieString(model);
+
+            model.soundFire.play();
         }
     }
 
@@ -272,6 +294,8 @@ class ModelZombie {
                     }
                 }
 
+                model.soundGrenade.play();
+
                 return true;
             }
         }
@@ -300,12 +324,69 @@ class ModelZombie {
             }
         }
     }
+
+    setHandlerVoice(model, fire, grenade, achivement, brains, introTheme, gameGo) {
+        const addSound = sound => {
+            if (sound) {
+                return {
+                    play: () => {
+                        sound.autoplay = true;
+                        const promise = sound.play();
+
+                        promise.then(() => {}).catch((e) => {});
+                    },
+                    stop: () => {
+                        sound.pause();
+                        sound.currentTime = 0;
+                    }
+                }
+            }
+
+            return { play: () => {}, stop: () => {} }
+        }
+
+        const addArrSound = arrSound => {
+            if (Array.isArray(arrSound) && arrSound.length > 0) {
+                return {
+                    sound: null,
+                    play: function() {
+                        this.sound = arrSound[Math.floor(Math.random() * arrSound.length)];
+                        this.sound.play();
+                    },
+                    stop: function() {
+                        if (this.sound) {
+                            this.sound.pause();
+                            this.sound.currentTime = 0;
+                        }
+                    }
+                }
+            }
+
+            return { play: () => {}, stop: () => {} }
+        }
+
+        model.soundFire = addSound(fire);
+        model.soundGrenade = addSound(grenade);
+        model.soundAchievement = addSound(achivement);
+        model.soundBrains = addArrSound(brains);
+        model.soundIntroTheme = addSound(introTheme);
+        model.soundGameGo = addArrSound(gameGo);
+    }
+
+    clearAllVoices(model) {
+        model.soundFire.stop();
+        model.soundGrenade.stop();
+        model.soundAchievement.stop();
+        model.soundBrains.stop();
+        model.soundIntroTheme.stop();
+        model.soundGameGo.stop();
+    }
 }
 
 const modelZombie = new ModelZombie();
 
 window.addEventListener('load',
     () => {
-        modelZombie.stopGame(model);
+        modelZombie.clear(model);
     }
 );
