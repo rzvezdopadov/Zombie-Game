@@ -9,107 +9,110 @@ const STATUS_GRENADE_FLY = 1;
 
 const LEVEL_SPEED = 2000;
 
-model = {
-    verticalCell: 15,
-    horizontalCell: 7,
-    level: 1,
-    levelSpeed: LEVEL_SPEED,
-    point: 0,
-    status: STATUS_GAME_NEW,
-    grenadeProgress: 0,
-    grenadePosition: { x: 0, y: 0 },
-    grenadeProcess: STATUS_GRENADE_WAIT,
-    grenadeRadiusDefeat: 2,
-    playerPosition: 0,
-    zombieGenerateMin: 2,
-    zombieGenerateMax: 5,
-    zombiePosition: [],
-
-    soundAchievement: () => {},
-    soundBrains: () => {},
-    soundFire: () => {},
-    soundGameGo: () => {},
-    soundGrenade: () => {},
-    soundIntroTheme: () => {},
-}
-
-class ModelZombie {
+class Model {
     constructor() {
+        this.verticalCell = 15;
+        this.horizontalCell = 7;
+        this.level = 1;
+        this.levelSpeed = LEVEL_SPEED;
+        this.point = 0;
+        this.status = STATUS_GAME_NEW;
+        this.grenadeProgress = 0;
+        this.grenadePosition = { x: 0, y: 0 };
+        this.grenadeProcess = STATUS_GRENADE_WAIT;
+        this.grenadeRadiusDefeat = 2;
+        this.playerPosition = 0;
+        this.zombieGenerateMin = 2;
+        this.zombieGenerateMax = 5;
+        this.zombiePosition = [];
+
+        this.soundAchievement = () => {};
+        this.soundBrains = () => {};
+        this.soundFire = () => {};
+        this.soundGameGo = () => {};
+        this.soundGrenade = () => {};
+        this.soundIntroTheme = () => {};
+
+        this.render = () => {};
+
         this.timer = null;
     }
 
-    clear(model) {
-        model.status = STATUS_GAME_NEW;
-        model.level = 1;
-        model.levelSpeed = LEVEL_SPEED;
-        model.grenadeProgress = 0;
-        model.point = 0;
+    clear() {
+        this.status = STATUS_GAME_NEW;
+        this.level = 1;
+        this.levelSpeed = LEVEL_SPEED;
+        this.grenadeProgress = 0;
+        this.point = 0;
 
-        const playerPosition = Math.round(model.horizontalCell / 2) - 1;
-        model.playerPosition = playerPosition;
-        model.grenadePosition.x = model.playerPosition;
-        model.grenadePosition.y = model.verticalCell - 1;
-        model.zombiePosition = [];
+        const playerPosition = Math.round(this.horizontalCell / 2) - 1;
+        this.playerPosition = playerPosition;
+        this.grenadePosition.x = this.playerPosition;
+        this.grenadePosition.y = this.verticalCell - 1;
+        this.zombiePosition = [];
+
+        this.render();
     }
 
-    createTimerGame(model) {
+    createTimerGame() {
         const timeOut = (model) => {
-            this.addNewZombieString(model);
+            model.addNewZombieString();
 
-            this.timer = setTimeout(() => {
+            model.timer = setTimeout(() => {
                 if (!((model.status === STATUS_GAME_DEFEAT) || (model.status === STATUS_GAME_NEW))) {
                     timeOut(model);
                 } else {
-                    clearTimeout(this.timer);
+                    clearTimeout(model.timer);
                 }
             }, model.levelSpeed);
         }
-        timeOut(model);
+
+        timeOut(this);
     }
 
-    startGame(model) {
+    startGame() {
         if ((model.status === STATUS_GAME_NEW) || (model.status === STATUS_GAME_DEFEAT)) {
-            this.clear(model);
+            this.clear();
 
-            model.status = STATUS_GAME_IN_PROCESS;
+            this.status = STATUS_GAME_IN_PROCESS;
 
-            this.createTimerGame(model);
+            this.createTimerGame();
 
-            this.clearAllVoices(model);
+            this.clearAllVoices();
 
-            model.soundGameGo.play();;
+            this.soundGameGo.play();;
         }
     }
 
-    pauseGame(model) {
-        if (model.status === STATUS_GAME_IN_PROCESS) {
-            model.status = STATUS_GAME_PAUSE;
-        } else if (model.status === STATUS_GAME_PAUSE) {
-            model.status = STATUS_GAME_IN_PROCESS;
+    pauseGame() {
+        if (this.status === STATUS_GAME_IN_PROCESS) {
+            this.status = STATUS_GAME_PAUSE;
+        } else if (this.status === STATUS_GAME_PAUSE) {
+            this.status = STATUS_GAME_IN_PROCESS;
         }
     }
 
-    stopGame(model) {
-        this.clear(model);
+    stopGame() {
+        this.clear();
 
-        this.clearAllVoices(model);
+        this.clearAllVoices();
 
-        model.soundIntroTheme.play();
+        this.soundIntroTheme.play();
     }
 
-    addNewZombieString(model) {
-        if (model.status === STATUS_GAME_IN_PROCESS) {
+    addNewZombieString() {
+        if (this.status === STATUS_GAME_IN_PROCESS) {
             const arr = [];
 
-            let randCountZombie = Math.floor(Math.random() * (model.zombieGenerateMax - model.zombieGenerateMin + 1)) + model.zombieGenerateMin;
+            let randCountZombie = Math.floor(Math.random() * (this.zombieGenerateMax - this.zombieGenerateMin + 1)) + this.zombieGenerateMin;
 
-            for (let i = model.zombieGenerateMin; i < randCountZombie + 2; i++) {
+            for (let i = this.zombieGenerateMin; i < randCountZombie + 2; i++) {
                 let flagExit = true;
 
                 while (flagExit) {
                     flagExit = false;
 
-                    const newZombiePos = Math.floor(Math.random() * (model.horizontalCell));
+                    const newZombiePos = Math.floor(Math.random() * (this.horizontalCell));
 
                     for (let j = 0; j < arr.length; j++) {
                         if (arr[j] === newZombiePos) flagExit = true;
@@ -121,98 +124,104 @@ class ModelZombie {
                 }
             }
 
-            model.zombiePosition.push(arr);
+            this.zombiePosition.push(arr);
 
-            if (model.zombiePosition.length > model.verticalCell) model.zombiePosition.splice(0, 1);
+            if (this.zombiePosition.length > this.verticalCell) this.zombiePosition.splice(0, 1);
 
-            if (model.point % 3) model.soundBrains.play();
+            if (this.point % 3) this.soundBrains.play();
 
-            this.testOnTheDefeatPlayer(model);
+            this.testOnTheDefeatPlayer();
+
+            this.render();
         }
     }
 
-    pointInc(model) {
-        let point = model.point;
-        model.point++;
+    pointInc() {
+        let point = this.point;
+        this.point++;
 
         const pointBefore = Math.floor(point / 100);
-        const pointAfter = Math.floor(model.point / 100);
+        const pointAfter = Math.floor(this.point / 100);
 
         if (pointBefore !== pointAfter) {
-            model.level++;
-            model.levelSpeed *= 0.9;
+            this.level++;
+            this.levelSpeed *= 0.9;
 
-            model.soundAchievement.play();
+            this.soundAchievement.play();
         }
     }
 
-    playerGoToLeft(model) {
-        if (model.status === STATUS_GAME_IN_PROCESS) {
-            let playerPosition = model.playerPosition;
-            model.playerPositionOld = playerPosition;
+    playerGoToLeft() {
+        if (this.status === STATUS_GAME_IN_PROCESS) {
+            let playerPosition = this.playerPosition;
+            this.playerPositionOld = playerPosition;
 
             if (--playerPosition < 0) {
                 playerPosition = 0;
             }
 
-            model.playerPosition = playerPosition;
-            this.grenadePositionUpdate(model);
+            this.playerPosition = playerPosition;
+            this.grenadePositionUpdate();
         }
     }
 
-    playerGoToRight(model) {
-        if (model.status === STATUS_GAME_IN_PROCESS) {
-            let playerPosition = model.playerPosition;
-            model.playerPositionOld = playerPosition;
+    playerGoToRight() {
+        if (this.status === STATUS_GAME_IN_PROCESS) {
+            let playerPosition = this.playerPosition;
+            this.playerPositionOld = playerPosition;
 
-            if (++playerPosition > model.horizontalCell - 1) {
-                playerPosition = model.horizontalCell - 1;
+            if (++playerPosition > this.horizontalCell - 1) {
+                playerPosition = this.horizontalCell - 1;
             }
 
-            model.playerPosition = playerPosition;
-            this.grenadePositionUpdate(model);
+            this.playerPosition = playerPosition;
+            this.grenadePositionUpdate(this);
         }
     }
 
-    grenadePositionUpdate(model) {
-        if (model.grenadeProcess === STATUS_GRENADE_WAIT) {
-            model.grenadePosition.x = model.playerPosition;
-            model.grenadePosition.y = model.verticalCell - 1;
+    grenadePositionUpdate() {
+        if (this.grenadeProcess === STATUS_GRENADE_WAIT) {
+            this.grenadePosition.x = this.playerPosition;
+            this.grenadePosition.y = this.verticalCell - 1;
+
+            this.render();
         }
     }
 
-    testOnTheDefeatPlayer(model) {
-        if (model.status === STATUS_GAME_IN_PROCESS) {
-            if ((model.zombiePosition.length === (model.verticalCell)) && (model.zombiePosition[0].length > 0)) {
-                model.status = STATUS_GAME_DEFEAT;
+    testOnTheDefeatPlayer() {
+        if (this.status === STATUS_GAME_IN_PROCESS) {
+            if ((this.zombiePosition.length === (this.verticalCell)) && (this.zombiePosition[0].length > 0)) {
+                this.status = STATUS_GAME_DEFEAT;
             }
         }
     }
 
-    incGrenadeProgress(model) {
-        if (model.status === STATUS_GAME_IN_PROCESS) {
-            let grenadeProgress = model.grenadeProgress + 10;
+    incGrenadeProgress() {
+        if (this.status === STATUS_GAME_IN_PROCESS) {
+            let grenadeProgress = this.grenadeProgress + 10;
 
             if (grenadeProgress > 100) {
                 grenadeProgress = 100;
             }
 
-            model.grenadeProgress = grenadeProgress;
+            this.grenadeProgress = grenadeProgress;
+
+            this.render();
         }
     }
 
-    fireAmount(model) {
-        if (model.status === STATUS_GAME_IN_PROCESS) {
-            const playerPosition = model.playerPosition;
+    fireAmount() {
+        if (this.status === STATUS_GAME_IN_PROCESS) {
+            const playerPosition = this.playerPosition;
             let zombieHit = false;
-            let zombiePosition = model.zombiePosition;
+            let zombiePosition = this.zombiePosition;
 
             for (let i = 0; i < zombiePosition.length; i++) {
                 for (let j = 0; j < zombiePosition[i].length; j++) {
                     if (zombiePosition[i][j] === playerPosition) {
                         zombiePosition[i].splice(j, 1);
                         zombieHit = true;
-                        this.pointInc(model);
+                        this.pointInc();
                         break;
                     }
                 }
@@ -220,81 +229,85 @@ class ModelZombie {
                 if (zombieHit === true) break;
             }
 
-            if (!zombieHit) this.addNewZombieString(model);
+            if (!zombieHit) {
+                this.addNewZombieString();
+            } else {
+                this.render();
+            }
 
-            model.soundFire.play();
+            this.soundFire.play();
         }
     }
 
-    fireGrenade(model) {
-        if ((model.status === STATUS_GAME_IN_PROCESS) && (model.grenadeProgress === 100)) {
-            model.grenadeProgress = 0;
-            model.grenadeProcess = STATUS_GRENADE_FLY;
+    fireGrenade() {
+        if ((this.status === STATUS_GAME_IN_PROCESS) && (this.grenadeProgress === 100)) {
+            this.grenadeProgress = 0;
+            this.grenadeProcess = STATUS_GRENADE_FLY;
 
-            const fireGrenadeProcess = (model) => {
+            const fireGrenadeProcess = () => {
 
-                if (--model.grenadePosition.y < 0) {
-                    model.grenadePosition.y = model.verticalCell - 1;
+                if (--this.grenadePosition.y < 0) {
+                    this.grenadePosition.y = this.verticalCell - 1;
                 }
 
-                const statusGrenade = modelZombie.testGrenadeHit(model);
+                const statusGrenade = this.testGrenadeHit();
+
+                this.render();
 
                 return statusGrenade;
             }
 
             const grenadeInterval = setInterval(() => {
-
-
-                if (fireGrenadeProcess(model) || (model.grenadePosition.y === model.verticalCell - 1)) {
+                if (fireGrenadeProcess() || (this.grenadePosition.y === this.verticalCell - 1)) {
                     clearInterval(grenadeInterval);
-                    model.grenadeProcess = STATUS_GRENADE_WAIT;
+                    this.grenadeProcess = STATUS_GRENADE_WAIT;
 
-                    if (model.grenadePosition.y === model.verticalCell - 1) {
-                        this.addNewZombieString(model);
+                    if (this.grenadePosition.y === this.verticalCell - 1) {
+                        this.addNewZombieString();
                     }
 
-                    this.grenadePositionUpdate(model);
+                    this.grenadePositionUpdate();
                 }
             }, 100);
         }
     }
 
-    testGrenadeHit(model) {
-        if (model.zombiePosition.length > model.grenadePosition.y) {
+    testGrenadeHit() {
+        if (this.zombiePosition.length > this.grenadePosition.y) {
             let zombieHit = false;
-            const zombiePosition = (model.zombiePosition.length - model.grenadePosition.y) - 1;
+            const zombiePosition = (this.zombiePosition.length - this.grenadePosition.y) - 1;
 
-            for (let i = 0; i < model.zombiePosition[zombiePosition].length; i++) {
-                if (model.zombiePosition[zombiePosition][i] === model.grenadePosition.x) zombieHit = true;
+            for (let i = 0; i < this.zombiePosition[zombiePosition].length; i++) {
+                if (this.zombiePosition[zombiePosition][i] === this.grenadePosition.x) zombieHit = true;
             }
 
             if (zombieHit === true) {
-                let minX = model.grenadePosition.x - model.grenadeRadiusDefeat;
+                let minX = this.grenadePosition.x - this.grenadeRadiusDefeat;
                 if (minX < 0) minX = 0;
 
-                let maxX = model.grenadePosition.x + model.grenadeRadiusDefeat;
-                if (maxX > model.horizontalCell - 1) model.maxX = model.horizontalCell - 1;
+                let maxX = this.grenadePosition.x + this.grenadeRadiusDefeat;
+                if (maxX > this.horizontalCell - 1) this.maxX = this.horizontalCell - 1;
 
-                let minY = model.zombiePosition.length - (model.grenadePosition.y + model.grenadeRadiusDefeat + 1);
+                let minY = this.zombiePosition.length - (this.grenadePosition.y + this.grenadeRadiusDefeat + 1);
                 if (minY < 0) minY = 0;
 
-                let maxY = model.zombiePosition.length - (model.grenadePosition.y - model.grenadeRadiusDefeat + 1);
-                if (maxY > model.zombiePosition.length) maxY = model.zombiePosition.length;
+                let maxY = this.zombiePosition.length - (this.grenadePosition.y - this.grenadeRadiusDefeat + 1);
+                if (maxY > this.zombiePosition.length) maxY = this.zombiePosition.length;
 
                 for (let i = minY; i < maxY + 1; i++) {
-                    if (model.zombiePosition[i] && (model.zombiePosition[i].length > 0)) {
-                        for (let j = model.zombiePosition[i].length - 1; j > -1; j--) {
-                            const zombiePositionIn = model.zombiePosition[i][j];
+                    if (this.zombiePosition[i] && (this.zombiePosition[i].length > 0)) {
+                        for (let j = this.zombiePosition[i].length - 1; j > -1; j--) {
+                            const zombiePositionIn = this.zombiePosition[i][j];
 
                             if ((zombiePositionIn >= minX) && ((zombiePositionIn) <= maxX)) {
-                                model.zombiePosition[i].splice(j, 1);
-                                this.pointInc(model);
+                                this.zombiePosition[i].splice(j, 1);
+                                this.pointInc();
                             }
                         }
                     }
                 }
 
-                model.soundGrenade.play();
+                this.soundGrenade.play();
 
                 return true;
             }
@@ -303,29 +316,29 @@ class ModelZombie {
         return false;
     }
 
-    getKeyUpUser(event, model) {
-        if (model.status === STATUS_GAME_IN_PROCESS) {
+    getKeyUpUser(event) {
+        if (this.status === STATUS_GAME_IN_PROCESS) {
             switch (event.code) {
                 case 'ArrowLeft':
-                    this.playerGoToLeft(model);
+                    this.playerGoToLeft();
                     break;
 
                 case 'ArrowRight':
-                    this.playerGoToRight(model);
+                    this.playerGoToRight();
                     break;
 
                 case 'Space':
-                    this.fireAmount(model);
+                    this.fireAmount();
                     break;
 
                 case 'KeyG':
-                    this.fireGrenade(model);
+                    this.fireGrenade();
                     break;
             }
         }
     }
 
-    setHandlerVoice(model, fire, grenade, achivement, brains, introTheme, gameGo) {
+    setHandlerVoice(fire, grenade, achivement, brains, introTheme, gameGo) {
         const addSound = sound => {
             if (sound) {
                 return {
@@ -365,28 +378,26 @@ class ModelZombie {
             return { play: () => {}, stop: () => {} }
         }
 
-        model.soundFire = addSound(fire);
-        model.soundGrenade = addSound(grenade);
-        model.soundAchievement = addSound(achivement);
-        model.soundBrains = addArrSound(brains);
-        model.soundIntroTheme = addSound(introTheme);
-        model.soundGameGo = addArrSound(gameGo);
+        this.soundFire = addSound(fire);
+        this.soundGrenade = addSound(grenade);
+        this.soundAchievement = addSound(achivement);
+        this.soundBrains = addArrSound(brains);
+        this.soundIntroTheme = addSound(introTheme);
+        this.soundGameGo = addArrSound(gameGo);
     }
 
-    clearAllVoices(model) {
-        model.soundFire.stop();
-        model.soundGrenade.stop();
-        model.soundAchievement.stop();
-        model.soundBrains.stop();
-        model.soundIntroTheme.stop();
-        model.soundGameGo.stop();
+    clearAllVoices() {
+        this.soundFire.stop();
+        this.soundGrenade.stop();
+        this.soundAchievement.stop();
+        this.soundBrains.stop();
+        this.soundIntroTheme.stop();
+        this.soundGameGo.stop();
+    }
+
+    setHandlerRedraw(clbk) {
+        if (typeof(clbk) === 'function') {
+            this.render = clbk;
+        }
     }
 }
-
-const modelZombie = new ModelZombie();
-
-window.addEventListener('load',
-    () => {
-        modelZombie.clear(model);
-    }
-);

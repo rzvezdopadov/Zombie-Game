@@ -3,8 +3,8 @@ const playerDiv = '<div class="player"><div>';
 const zombieDiv = '<div class="zombie"><div>';
 const grenadeDiv = '<div class="grenade"><div>';
 
-class ViewZombie {
-    createCell(model) {
+class View {
+    createCell(controller) {
         const elemDivTable = document.createElement('div');
         elemDivTable.classList.add('flex');
         elemDivTable.id = 'divTable';
@@ -13,10 +13,10 @@ class ViewZombie {
 
         let posId = 0;
 
-        for (let i = 0; i < model.verticalCell; i += 1) {
+        for (let i = 0; i < controller.model.verticalCell; i += 1) {
             const elemTr = document.createElement('tr');
 
-            for (let j = 0; j < model.horizontalCell; j += 1) {
+            for (let j = 0; j < controller.model.horizontalCell; j += 1) {
                 const elemTd = document.createElement('td');
                 elemTd.id = posId++;
                 elemTd.classList.add('tdaria');
@@ -51,7 +51,7 @@ class ViewZombie {
         return elemDivBtn;
     }
 
-    createStatisticsInterface(model) {
+    createStatisticsInterface(controller) {
         const elemDivStatistics = document.createElement('div');
         elemDivStatistics.classList.add('statistics');
 
@@ -83,9 +83,9 @@ class ViewZombie {
 
         elemDivStatistics.appendChild(createStr('', '', ''));
 
-        elemDivStatistics.appendChild(createStr('Статус:', 'status', statusGame[model.status]));
-        elemDivStatistics.appendChild(createStr('Уровень:', 'level', model.level));
-        elemDivStatistics.appendChild(createStr('Набрано очков:', 'point', model.point));
+        elemDivStatistics.appendChild(createStr('Статус:', 'status', statusGame[controller.model.status]));
+        elemDivStatistics.appendChild(createStr('Уровень:', 'level', controller.model.level));
+        elemDivStatistics.appendChild(createStr('Набрано очков:', 'point', controller.model.point));
 
         const elemDiv = document.createElement('div');
         elemDiv.classList.add('flex');
@@ -100,22 +100,22 @@ class ViewZombie {
         return elemDivStatistics;
     }
 
-    createAllViewInterface(model) {
+    createAllViewInterface(controller) {
         const elemMain = document.getElementById('main');
 
         const elemDivSellAndButton = document.createElement('div');
         elemDivSellAndButton.classList.add('SellAndButton');
-        elemDivSellAndButton.appendChild(viewZombie.createCell(model));
-        elemDivSellAndButton.appendChild(viewZombie.createButtonInterface(model));
+        elemDivSellAndButton.appendChild(this.createCell(controller));
+        elemDivSellAndButton.appendChild(this.createButtonInterface(controller));
 
         elemMain.appendChild(elemDivSellAndButton);
 
-        elemMain.appendChild(viewZombie.createStatisticsInterface(model));
+        elemMain.appendChild(this.createStatisticsInterface(controller));
     }
 
-    clearAllArea(model) {
+    clearAllArea(controller) {
         if (document.getElementById(0) !== null) {
-            for (let i = 0; i < model.verticalCell * model.horizontalCell; i++) {
+            for (let i = 0; i < controller.model.verticalCell * controller.model.horizontalCell; i++) {
                 document.getElementById(i).innerHTML = '';
             }
         }
@@ -127,31 +127,32 @@ class ViewZombie {
         document.getElementById('stop').blur();
     }
 
-    updateStatistics(model) {
-        document.getElementById('status').innerHTML = statusGame[model.status];
-        document.getElementById('level').innerHTML = model.level;
-        document.getElementById('point').innerHTML = model.point;
-        document.getElementById('grenadeprogressbarin').style.width = model.grenadeProgress + 'px';
+    updateStatistics(controller) {
+        document.getElementById('status').innerHTML = statusGame[controller.model.status];
+        document.getElementById('level').innerHTML = controller.model.level;
+        document.getElementById('point').innerHTML = controller.model.point;
+        document.getElementById('grenadeprogressbarin').style.width = controller.model.grenadeProgress + 'px';
     }
 
-    updatePlayerPosition(model) {
+    updatePlayerPosition(controller) {
         if (document.getElementById(0) !== null) {
-            const playerPosition = model.horizontalCell * model.verticalCell - (model.horizontalCell - model.playerPosition);
+            const playerPosition = controller.model.horizontalCell * controller.model.verticalCell -
+                (controller.model.horizontalCell - controller.model.playerPosition);
             document.getElementById(playerPosition).innerHTML = playerDiv;
         }
     }
 
-    updateZombiePosition(model) {
+    updateZombiePosition(controller) {
         if (document.getElementById(0) !== null) {
-            if (('' + model.zombiePositionOld) !== ('' + model.zombiePosition)) {
-                for (let i = 0; i < (model.verticalCell * model.horizontalCell) - model.horizontalCell; i++) {
+            if (('' + controller.model.zombiePositionOld) !== ('' + controller.model.zombiePosition)) {
+                for (let i = 0; i < (controller.model.verticalCell * controller.model.horizontalCell) - controller.model.horizontalCell; i++) {
                     document.getElementById(i).innerHTML = '';
                 }
 
-                for (let i = 0; i < model.zombiePosition.length; i++) {
-                    for (let j = 0; j < model.zombiePosition[i].length; j++) {
-                        const id = model.zombiePosition.length * model.horizontalCell -
-                            (i * model.horizontalCell + (model.horizontalCell - model.zombiePosition[i][j]));
+                for (let i = 0; i < controller.model.zombiePosition.length; i++) {
+                    for (let j = 0; j < controller.model.zombiePosition[i].length; j++) {
+                        const id = controller.model.zombiePosition.length * controller.model.horizontalCell -
+                            (i * controller.model.horizontalCell + (controller.model.horizontalCell - controller.model.zombiePosition[i][j]));
                         document.getElementById(id).innerHTML = zombieDiv;
                     }
                 }
@@ -159,9 +160,9 @@ class ViewZombie {
         }
     }
 
-    updateGrenadePosition(model) {
+    updateGrenadePosition(controller) {
         if (document.getElementById(0) !== null) {
-            const grenadePosition = model.horizontalCell * model.grenadePosition.y + model.grenadePosition.x;
+            const grenadePosition = controller.model.horizontalCell * controller.model.grenadePosition.y + controller.model.grenadePosition.x;
             document.getElementById(grenadePosition).innerHTML = grenadeDiv;
         }
     }
@@ -185,23 +186,11 @@ class ViewZombie {
         document.addEventListener('keyup', clbk);
     }
 
-    redraw(model) {
-        this.clearAllArea(model);
-        this.updateStatistics(model);
-        this.updateZombiePosition(model);
-        this.updateGrenadePosition(model);
-        this.updatePlayerPosition(model);
+    redraw() {
+        this.view.clearAllArea(this);
+        this.view.updateStatistics(this);
+        this.view.updateZombiePosition(this);
+        this.view.updateGrenadePosition(this);
+        this.view.updatePlayerPosition(this);
     }
 }
-
-const viewZombie = new ViewZombie();
-
-window.addEventListener('load',
-    () => {
-        viewZombie.createAllViewInterface(model);
-
-        setInterval(() => {
-            viewZombie.redraw(model);
-        }, 100);
-    }
-);
