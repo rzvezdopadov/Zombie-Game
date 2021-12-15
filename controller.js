@@ -14,8 +14,11 @@ class Controller {
         const stopGame = () => { this.model.stopGame() }
         this.view.setHandlerButton(startGame, pauseGame, stopGame);
 
-        const eventGame = event => { this.model.getKeyUpUser(event) };
-        this.view.setHandlerKey(eventGame);
+        const eventGameKey = event => { this.model.getKeyUpUser(event) };
+        this.view.setHandlerKey(eventGameKey);
+
+        const eventGameTouch = event => { this.model.getTouchUser(event) };
+        this.view.setHandlerTouch(eventGameTouch);
 
         const soundAchievement = new Audio('sound/Achievement.mp3');
         const soundBrains1 = new Audio('sound/Brains1.mp3');

@@ -36,6 +36,9 @@ class Model {
         this.render = () => {};
 
         this.timer = null;
+
+        this.touchStartX = 0;
+        this.touchStartY = 0;
     }
 
     clear() {
@@ -334,6 +337,31 @@ class Model {
                 case 'KeyG':
                     this.fireGrenade();
                     break;
+            }
+        }
+    }
+
+    getTouchUser(event) {
+        if (this.status === STATUS_GAME_IN_PROCESS) {
+            if (event.type === 'touchstart') {
+                this.touchStartX = event.changedTouches[0].pageX;
+                this.touchStartY = event.changedTouches[0].pageY;
+            } else if (event.type === 'touchend') {
+                const abs = num => Math.abs(num);
+                const touchEndX = event.changedTouches[0].pageX;
+                const touchEndY = event.changedTouches[0].pageY;
+                const absX = abs(touchEndX - this.touchStartX);
+                const absY = abs(touchEndY - this.touchStartY);
+
+                if ((touchEndX < this.touchStartX) && (absX > absY)) {
+                    this.playerGoToLeft();
+                } else if ((touchEndX > this.touchStartX) && (absX > absY)) {
+                    this.playerGoToRight();
+                } else  if ((touchEndY < this.touchStartY) && (absY > absX)) {
+                    this.fireAmount();
+                } else if ((touchEndY > this.touchStartY) && (absY > absX)) {
+                    this.fireGrenade();
+                } 
             }
         }
     }

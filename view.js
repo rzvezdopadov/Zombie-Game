@@ -76,10 +76,18 @@ class View {
             return elemDiv;
         }
 
+        let fireKeyStr = 'Пробел';
+        let grenadeKeyStr = 'G'; 
+
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|BB|PlayBook|IEMobile|Windows Phone|Kindle|Silk|Opera Mini/i.test(navigator.userAgent)) {
+            fireKeyStr = '&uArr;';
+            grenadeKeyStr = '&dArr;';               
+        } 
+
         elemDivStatistics.appendChild(createStr('Игрок влево:', '', '&lArr;'));
         elemDivStatistics.appendChild(createStr('Игрок вправо:', '', '&rArr;'));
-        elemDivStatistics.appendChild(createStr('Стрелять:', '', 'Пробел'));
-        elemDivStatistics.appendChild(createStr('Граната:', '', 'G'));
+        elemDivStatistics.appendChild(createStr('Стрелять:', '', fireKeyStr));
+        elemDivStatistics.appendChild(createStr('Граната:', '', grenadeKeyStr));
 
         elemDivStatistics.appendChild(createStr('', '', ''));
 
@@ -184,6 +192,11 @@ class View {
 
     setHandlerKey(clbk) {
         document.addEventListener('keyup', clbk);
+    }
+
+    setHandlerTouch(clbk) {
+        document.addEventListener('touchstart', clbk);
+        document.addEventListener('touchend', clbk);  
     }
 
     redraw() {
